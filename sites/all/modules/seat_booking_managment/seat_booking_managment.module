@@ -1,0 +1,48 @@
+<?php
+
+function seat_booking_managment_menu() {
+		$items = array();
+		$items['node/seat_booking_managment/ajax/%/%'] = array(
+			'page callback' => 'seat_booking_managment_access', // Render HTML.
+			'page arguments' => array(3,4),
+			'type' => MENU_CALLBACK,
+			'access arguments' => array('access content')
+		);
+
+		return $items;
+	}
+
+
+	function seat_booking_managment_access($param1,$param2){
+		$node_id = $param1;
+        $username = $param2;
+		
+		$result =db_select('field_data_field_number_of_seats ', 'n')
+                ->fields('n', array('field_number_of_seats_value'))
+                ->condition('entity_id', $node_id , '=')
+                ->execute();
+		$arr = '';
+		foreach($result as $results){
+			
+			$arr = $results->field_number_of_seats_value;
+			
+		} 
+		
+        $availbe_seat = $arr-1;
+		
+		
+		$result1 = db_update('field_data_field_number_of_seats')
+                ->fields(array('field_number_of_seats_value' => $availbe_seat))
+				->condition('entity_id', $node_id , '=')
+				->execute();
+		
+        $result2 = db_insert('event_seat_booking_details')
+                ->fields(array(
+                    'booked_by' => $username,
+                    'event_id' => $node_id
+                ))
+                ->execute();
+        print_r( $result2);
+	}
+
+     
